@@ -1,0 +1,149 @@
+####################################################################################################
+##
+##  VERSION
+##
+##  Generate a version string header with a user-specified string or, alternatively,
+##  information from Git in the following format:
+##      - `v1.2.3`: on a clean commit tagged `v.1.2.3`.
+##      - `v1.2.3-11-g1234abc`: on commit `g1234abc`, 11 commits ahead of the last tag.
+##      - `v1.2.3-11-g1234abc-dirty`: same as above but there are uncommited changes.
+##
+##  Usage: Simply include this script from your project's main CMakeLists.txt.
+##         The default config values should work in most cases out of the box.
+##
+####################################################################################################
+
+TODO:
+- Que exporte la version como variable CMAKE para todo el proyecto (si eso se usa?)
+- Que se ejecute con MAKE todas las veces, no solo con CMAKE
+- Que no sobreescriba el fichero .h si no hay anda que tocar, comparar el contenido
+
+
+cmake_minimum_required(VERSION 3.11)
+
+##==================================================================================================
+## Configuration
+##==================================================================================================
+
+set(VERSION "git" CACHE STRING
+    "Specify a version value or select an automatic source {git}")
+
+set(VERSION_OUTPUT_FILE "version.h" CACHE FILEPATH
+    "Path to output header file containing version string")
+
+set(VERSION_CXX_FORMAT          "const char[]") # Type to store version string as
+set(VERSION_CXX_VAR_NAME        "VERSION")      # Variable name to store version string in
+set(GIT_IGNORE_FILE             ".gitignore")   # Path to gitignore file
+set(GIT_IGNORE_APPEND           ON)             # If ON, adds $VERSION_OUTPUT_FILE to gitignore
+
+##==================================================================================================
+## Select source for version
+##==================================================================================================
+if(VERSION STREQUAL "git")
+    set(VERSION_SOURCE "GIT")
+else()
+    set(VERSION_SOURCE "USER")
+endif()
+
+##==================================================================================================
+## Determine version
+##==================================================================================================
+
+##--------------------------------------------------------------------------------------------------
+## Version from git
+##
+if(VERSION_SOURCE STREQUAL "GIT")
+    message("Attempting to use git to determine project version")
+
+    find_package(Git)
+    if(GIT_FOUND)
+        message(VERBOSE "git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION}")
+
+        ## Set <GIT_VERSION>
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} describe --tags --dirty --match "v*"
+            OUTPUT_VARIABLE GIT_VERSION
+            RESULT_VARIABLE GIT_VERSION_ERROR_CODE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
+        ## Check for errors -> Deetermine cause of error -> overwrite <GIT_VERSION> accordingly
+        if(GIT_VERSION_ERROR_CODE)
+            ## Check if in a git repo
+            execute_process(
+                COMMAND ${GIT_EXECUTABLE} git rev-parse --is-inside-work-tree
+                RESULT_VARIABLE GIT_REPO_ERROR_CODE
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+
+            ## Not in a git repo
+            if(GIT_REPO_ERROR_CODE)
+                message(WARNING "${GIT_VERSION_ERROR_CODE}")
+                set(GIT_VERSION "v0.0-NOT-A-GIT-REPO")
+
+            ## Tag is likely invalid
+            else()
+                message(WARNING "git tag appears to be invalid. ${GIT_VERSION_ERROR_CODE}")
+                set(GIT_VERSION "v0.0-INVALID-GIT-TAG")
+            endif()
+        endif()
+
+    else()
+        message(WARNING "Git not found, unable to determine project version with Git" )
+        set(GIT_VERSION "v0.0-GIT-NOT-FOUND")
+
+    endif()
+
+    set(VERSION ${GIT_VERSION})
+
+
+##--------------------------------------------------------------------------------------------------
+## Version set by user
+##
+elseif(VERSION_SOURCE STREQUAL "USER")
+    # VERSION already contains user-set value, no action needed
+
+##--------------------------------------------------------------------------------------------------
+## Invalid version source
+##
+else()
+    error("Invalid VERSION source: ${VERSION_SOURCE}")
+
+endif()
+
+##==================================================================================================
+## Store version to header file
+##==================================================================================================
+file(WRITE
+    "${VERSION_OUTPUT_FILE}"
+    "#pragma once\n"
+    "\n"
+    "//------------------------------------------------------------------------------\n"
+    "//\n"
+    "// DO NOT EDIT THIS FILE!\n"
+    "//\n"
+    "// This file was created by CMake to get the version from the latest git tag.\n"
+    "// It should update automatically everytime you recompile.\n"
+    "//\n"
+    "// If the version does not update correctly, make sure that your CMakeLists.txt\n"
+    "// includes the 'git-version.cmake' file.\n"
+    "//\n"
+    "//------------------------------------------------------------------------------\n"
+    "\n"
+    "${VERSION_CXX_FORMAT} ${VERSION_CXX_VAR_NAME} = \"${VERSION}\";\n"
+)
+
+message("VERSION set by ${VERSION_SOURCE} to ${VERSION} in file ${VERSION_OUTPUT_FILE}")
+
+##==================================================================================================
+## Update .gitignore file to avoid detecting changes
+##==================================================================================================
+if(GIT_IGNORE_APPEND)
+    file(READ ${GIT_IGNORE_FILE} GITINGORE_CONTENT)
+    string(FIND "${GITINGORE_CONTENT}" "${VERSION_OUTPUT_FILE}" MATCHRES)
+
+    if(${MATCHRES} EQUAL -1)
+        message("Adding ${VERSION_OUTPUT_FILE} to ${GIT_IGNORE_FILE}")
+        file(APPEND ${GIT_IGNORE_FILE} ${VERSION_OUTPUT_FILE})
+    endif ()
+endif()
