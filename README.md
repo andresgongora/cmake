@@ -13,7 +13,7 @@ as well as a gentle introduction to CMake itself.
 
 
 <!------------------------------------------------+------------------------------------------------>
-#                                                Utils
+#                                               Utils
 <!------------------------------------------------+------------------------------------------------>
 
 **TL;DR**: Just `include(cmake/utils/<SCRIPT>.cmake)` from your projects `CMakeLists.txt`.
@@ -27,3 +27,12 @@ declaration. For details, refer to each individual `.cmake` file for details and
 
 - **Version.cmake**
   Generate an automatic project version header using tag information from Git, e.g., `v1.2`.
+
+
+
+<!------------------------------------------------+------------------------------------------------>
+#                                               ABOUT
+<!------------------------------------------------+------------------------------------------------>
+
+- [MIT License](LICENSE).
+- [Info about the authors](AUTHORS.md).

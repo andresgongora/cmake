@@ -8,8 +8,9 @@
 ##      - `v1.2.3-11-g1234abc`: on commit `g1234abc`, 11 commits ahead of the last tag.
 ##      - `v1.2.3-11-g1234abc-dirty`: same as above but there are uncommited changes.
 ##
-##  Usage: Simply include this script from your project's main CMakeLists.txt.
-##         The default config values should work in most cases out of the box.
+##  Usage:
+##  Simply include this script from your project's main CMakeLists.txt.
+##  The default config values should work in most cases out of the box.
 ##
 ##  How it works:
 ##      1. Create configuration, some of which is available to the user.
@@ -27,7 +28,7 @@
 ##
 ####################################################################################################
 
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.11)
 
 ##==================================================================================================
 ## Configuration
@@ -59,7 +60,7 @@ file(WRITE ${VERSION_OUTPUT_FILE_TEMPLATE}
     "// your project or (when the version is determined automatically) recompile.\n"
     "//\n"
     "// If the version string does not update correctly, make sure that your\n"
-    "// CMakeLists.txt includes 'version.cmake' and that your cached variables\n"
+    "// CMakeLists.txt includes 'Version.cmake' and that your cached variables\n"
     "// in CMakeCache.txt are set correctly (consider using cmake-gui for this).\n"
     "//------------------------------------------------------------------------------\n"
     "\n"
@@ -81,27 +82,30 @@ endif()
 ##==================================================================================================
 ## Create cmake script
 ##==================================================================================================
-set(VERSION_UPDATER_SCRIPT_FILE     "${CMAKE_CURRENT_BINARY_DIR}/version_updater.cmake")
+set(VERSION_UPDATER_SCRIPT_FILE "${CMAKE_CURRENT_BINARY_DIR}/VersionUpdater.cmake")
 
 ## Version set by user: just copy our current VERSION into the script
 if(VERSION_SOURCE STREQUAL "USER")
-    file(CONFIGURE OUTPUT ${VERSION_UPDATER_SCRIPT_FILE} CONTENT [[
+    file(WRITE ${VERSION_UPDATER_SCRIPT_FILE}
+        "
         cmake_minimum_required(VERSION 3.11)
-        set(VERSION @VERSION@)
-        configure_file(@VERSION_OUTPUT_FILE_TEMPLATE@ @VERSION_OUTPUT_FILE@ @ONLY)
-        message("-- Project version set to \"${VERSION}\"")
-    ]] @ONLY)
+        set(VERSION ${VERSION})
+        configure_file(${VERSION_OUTPUT_FILE_TEMPLATE} ${VERSION_OUTPUT_FILE} @ONLY)
+        message(\"-- Project version set to \\\"\${VERSION}\\\"\")
+        "
+    )
 
 ## Version will be determined from git: small script that invokes git
 elseif(VERSION_SOURCE STREQUAL "GIT")
-    file(CONFIGURE OUTPUT ${VERSION_UPDATER_SCRIPT_FILE} CONTENT [[
+    file(WRITE ${VERSION_UPDATER_SCRIPT_FILE}
+        "
         cmake_minimum_required(VERSION 3.11)
 
         find_package(Git)
         if(GIT_FOUND)
             ## Set <GIT_VERSION>
             execute_process(
-                COMMAND ${GIT_EXECUTABLE} describe --tags --dirty --match "v*"
+                COMMAND \${GIT_EXECUTABLE} describe --tags --dirty --match \"v*\"
                 OUTPUT_VARIABLE GIT_VERSION
                 RESULT_VARIABLE GIT_VERSION_ERROR_CODE
                 OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -111,33 +115,34 @@ elseif(VERSION_SOURCE STREQUAL "GIT")
             if(GIT_VERSION_ERROR_CODE)
                 ## Check if in a git repo
                 execute_process(
-                    COMMAND ${GIT_EXECUTABLE} git rev-parse --is-inside-work-tree
+                    COMMAND \${GIT_EXECUTABLE} git rev-parse --is-inside-work-tree
                     RESULT_VARIABLE GIT_REPO_ERROR_CODE
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                 )
 
                 ## Not in a git repo
                 if(GIT_REPO_ERROR_CODE)
-                    message(WARNING "${GIT_VERSION_ERROR_CODE}")
-                    set(GIT_VERSION "v0.0-NOT-A-GIT-REPO")
+                    message(WARNING \"\${GIT_VERSION_ERROR_CODE}\")
+                    set(GIT_VERSION \"v0.0-NOT-A-GIT-REPO\")
 
                 ## Tag is likely invalid
                 else()
-                    message(WARNING "git tag appears to be invalid: ${GIT_VERSION_ERROR_CODE}")
-                    set(GIT_VERSION "v0.0-INVALID-GIT-TAG")
+                    message(WARNING \"git tag appears to be invalid: \${GIT_VERSION_ERROR_CODE}\")
+                    set(GIT_VERSION \"v0.0-INVALID-GIT-TAG\")
                 endif()
             endif()
 
         else()
-            message(WARNING "Git not found, unable to determine project version with Git" )
-            set(GIT_VERSION "v0.0-GIT-NOT-FOUND")
+            message(WARNING \"Git not found, unable to determine project version with Git\" )
+            set(GIT_VERSION \"v0.0-GIT-NOT-FOUND\")
 
         endif()
 
-        set(VERSION ${GIT_VERSION})
-        configure_file(@VERSION_OUTPUT_FILE_TEMPLATE@ @VERSION_OUTPUT_FILE@ @ONLY)
-        message("-- Project version set to \"${VERSION}\"")
-    ]] @ONLY)
+        set(VERSION \${GIT_VERSION})
+        configure_file(${VERSION_OUTPUT_FILE_TEMPLATE} ${VERSION_OUTPUT_FILE} @ONLY)
+        message(\"-- Project version set to \\\"\${VERSION}\\\"\")
+        "
+    )
 
 ## Invalid version source. Really, the script should never reach this point
 else()
