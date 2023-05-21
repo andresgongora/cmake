@@ -214,3 +214,61 @@ multiple configurations with which to compile the targets.
                 RUNTIME DESTINATION Release/bin)
 
 See https://cmake.org/cmake/help/latest/command/install.html for more information
+
+
+
+<!------------------------------------------------+------------------------------------------------>
+#                                  CMake commands for modular projects
+<!------------------------------------------------+------------------------------------------------>
+
+## Recursive CMake
+
+        add_subdirectory(···)
+
+Essentially, this command searches for a `CMakeLists.txt` file in a sepcified subdirectory.
+See https://cmake.org/cmake/help/latest/command/add_subdirectory.html
+
+## Exposing library APIs with `include_directories(...)`
+
+        target_include_directories(target_name {PUBLIC|PRIVATE|INTERFACE} directories...)
+
+This command can specify for (a previously declared) target where to look for header files.
+
+- `PUBLIC`: other targets that depend on `target_name` will also see the included directories.
+- `PRIVATE`: only `target_name` sees the included directories.
+- `INTERFACE`: only other targets that depend on `target_name` see the directories, but not
+  `target_name` itself.
+
+        cmake_minimum_required(VERSION 3.11)
+        project(MyProject)
+
+        add_executable(myexecutable main.cpp)
+        target_include_directories(myexecutable
+          PRIVATE
+            first_dir/
+            second_dir/)
+
+## Creating library instead of executables with `add_library`
+
+        add_library(libraryName
+            [STATIC|SHARED|MODULE]
+            [EXCLUDE_FROM_ALL]
+            source1 source2 ....)
+
+- `STATIC`: produce a static library.
+- `SHARED`: produce a shared library.
+- `MODULE`: libraries that can be loaded during runtime, _a la_ "plugin".
+
+`EXCLUDE_FROM_ALL`: do not compile library by default when running `cmake --build` unless its a
+  depedency for another tharget that does get built.
+
+Unless you have reason to specify it, do not specify a tipe for you libraries and let the end user
+can choose.
+
+See https://cmake.org/cmake/help/latest/command/add_library.html
+
+## Linking libraries
+
+        target_link_libraries(target_name
+            [PUBLIC|PRIVATE|INTERFACE]
+            library1 library2 ....)
