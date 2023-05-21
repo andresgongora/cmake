@@ -119,3 +119,11 @@ endif()
 ## Enable clang-tidy
 ##==================================================================================================
 set(CMAKE_CXX_CLANG_TIDY "clang-tidy;${CLANG_TIDY_OPTIONS};${CLANG_TIDY_CHECKS}")
+
+##==================================================================================================
+## Exclude dependencies from clang-tidy checks
+##==================================================================================================
+# file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/_deps/.clang-tidy"
+#     "Checks: '-*'"
+# )
+# Does not work yet

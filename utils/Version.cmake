@@ -26,6 +26,13 @@
 ##         This script calls ${CMAKE_COMMAND} -P, where '-P' means that we want to run a script
 ##         file, specifying the script generated in step 4.
 ##
+##  Notes:
+##  - We want the script to run on every make because we have no simple way to check whether
+##    there have been changes to Git (added a tag, a commit, the project becomes dirty, etc.).
+##    We could create a custom command that depends on the .git directory, but I've found it
+##    to be unreliable. If you read this, feel free to improve of this aspect of this script
+##    and PR your suggestion :)
+##
 ####################################################################################################
 
 cmake_minimum_required(VERSION 3.11)
@@ -155,5 +162,5 @@ endif()
 add_custom_target("version"
     ALL
     COMMAND ${CMAKE_COMMAND} -P ${VERSION_UPDATER_SCRIPT_FILE}
-    COMMENT "[version.cmake] Update project version using ${VERSION_SOURCE} information"
+    COMMENT "[Version.cmake] Update project version using ${VERSION_SOURCE} information"
 )
