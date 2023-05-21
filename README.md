@@ -25,6 +25,12 @@ declaration. For details, refer to each individual `.cmake` file for details and
 - **ClangTidy**
   Configure clang-tidy for your project. Project rules can be tweaked with `cmake-gui`.
 
+- **CompileOptions**
+  TO DO.
+
+- **GoogleTest**
+  Add GoogleTest (it creates the library `GTest::GTest`) to your project to run unit-tests.
+
 - **Version.cmake**
   Generate an automatic project version header using tag information from Git, e.g., `v1.2`.
 
