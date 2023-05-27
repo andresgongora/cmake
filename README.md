@@ -37,6 +37,22 @@ declaration. For details, refer to each individual `.cmake` file for details and
 
 
 <!------------------------------------------------+------------------------------------------------>
+#                                              Functions
+<!------------------------------------------------+------------------------------------------------>
+
+**TL;DR**: Just `include(cmake/functions/<SCRIPT>.cmake)` from your projects `CMakeLists.txt`.
+
+The following functions are really meant to be used by the above utils, but you may include them
+in your own scripts if you require the functionalities they provide.
+
+- **GetArgumentsFromList**
+  Useful when writing functions with optional arguments. This function will search for named
+  arguments and return their values. Among other options, arguments can be set to `REQUIRED` or
+  `OPTIONAL`.
+
+
+
+<!------------------------------------------------+------------------------------------------------>
 #                                               ABOUT
 <!------------------------------------------------+------------------------------------------------>
 
