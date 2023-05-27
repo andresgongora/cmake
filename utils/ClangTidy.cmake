@@ -6,12 +6,18 @@
 ##  violations, and performance improvements based on a set of customizable rules.
 ##
 ##  Usage:
-##  Simply include this script from your project's main CMakeLists.txt.
-##  The default config values should work in most cases out of the box.
+##      Simply include this script from your project's main CMakeLists.txt.
+##      The default config values should work in most cases out of the box.
+##      Optionally, you can set the variable `CLANG_TIDY_CHECK_EXCEPTIONS` before you include
+##      this script to avoid certain checks for your project. For example:
+##          ```
+##          set(CLANG_TIDY_CHECK_EXCEPTIONS "-readability-identifier-length,-modernize-use-trailing-return-type")
+##          include(tools/cmake/utils/ClangTidy.cmake)
+##          ```
 ##
-## To do:
-## - Add support for cross-compilation: https://discourse.cmake.org/t/using-clang-tidy-with-cross-compilation/5435
-## -
+##  To do:
+##      - Add support for cross-compilation: https://discourse.cmake.org/t/using-clang-tidy-with-cross-compilation/5435
+##      -
 ##
 ####################################################################################################
 
@@ -37,6 +43,10 @@ set(CLANG_TIDY_CHECK_PERFORMANCE            ON  CACHE BOOL "Checks that target p
 set(CLANG_TIDY_CHECK_PORTABILITY            ON  CACHE BOOL "Checks that target portability-related issues that don’t relate to any particular coding style")
 set(CLANG_TIDY_CHECK_READABILITY            ON  CACHE BOOL "Checks that target readability-related issues that don’t relate to any particular coding style")
 
+if (NOT CLANG_TIDY_CHECK_EXCEPTIONS)
+    set(CLANG_TIDY_CHECK_EXCEPTIONS         ""  CACHE STRING "Comma separated list of exceptions to all other rules. Use '+' to include and '-' to exclude. Example: '+readability-identifier-length,-modernize-use-trailing-return-type'")
+endif()
+
 ##==================================================================================================
 ## Return if clang-tidy disabled
 ##==================================================================================================
@@ -60,6 +70,8 @@ endif()
 if(CLANG_TIDY_WARNINGS_AS_ERRORS)
     set(CLANG_TIDY_OPTIONS "${CLANG_TIDY_OPTIONS};--warnings-as-errors=*")
 endif()
+
+message(STATUS "[ClangTidy.cmake] Options: ${CLANG_TIDY_OPTIONS}")
 
 ##==================================================================================================
 ## Parse checks
@@ -110,10 +122,17 @@ if(CLANG_TIDY_CHECK_READABILITY)
     set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},readability-*")
 endif()
 
+## Append exceptions string
+if(CLANG_TIDY_CHECK_EXCEPTIONS)
+    set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},${CLANG_TIDY_CHECK_EXCEPTIONS}")
+endif()
+
 # Check if no config applied, the fall back to default
 if(${CLANG_TIDY_CHECKS} STREQUAL "-checks=-*")
     set(CLANG_TIDY_CHECKS "-checks=cppcoreguidelines-*")
 endif()
+
+message(STATUS "[ClangTidy.cmake] Checks: ${CLANG_TIDY_CHECKS}")
 
 ##==================================================================================================
 ## Enable clang-tidy

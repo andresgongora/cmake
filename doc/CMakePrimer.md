@@ -169,11 +169,12 @@ cannot know when to ask CMake to regenerate.
 The C++ version can be set with these commands:
 
         set(CMAKE_CXX_STANDARD          11)
-        set(CMAKE_CXX_STANDARD_REQUIRED true)
-        set(CMAKE_CXX_EXTENSIONS        false)  # Optional
+        set(CMAKE_CXX_STANDARD_REQUIRED ON)
+        set(CMAKE_CXX_EXTENSIONS        OFF)  # Optional
 
 `CMAKE_CXX_EXTENSIONS` is optional and controls whether compiler specific flags should be added,
-such as `-std=gnu++11 instead of -std=c++11`. Defaults to `ON`.
+such as those intended to control compiler extensions (such as inline assembly) or other options.
+For more portable code, set this value to `OFF`. Defaults to `ON`.
 
 Extra compiler flags can be set with the following. Usually, you only need `CMAKE_CXX_FLAGS`,
 but other options may be specified for debug and release cases as well:

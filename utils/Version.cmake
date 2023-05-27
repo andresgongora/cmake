@@ -9,8 +9,8 @@
 ##      - `v1.2.3-11-g1234abc-dirty`: same as above but there are uncommited changes.
 ##
 ##  Usage:
-##  Simply include this script from your project's main CMakeLists.txt.
-##  The default config values should work in most cases out of the box.
+##      Simply include this script from your project's main CMakeLists.txt.
+##      The default config values should work in most cases out of the box.
 ##
 ##  How it works:
 ##      1. Create configuration, some of which is available to the user.
@@ -27,11 +27,11 @@
 ##         file, specifying the script generated in step 4.
 ##
 ##  Notes:
-##  - We want the script to run on every make because we have no simple way to check whether
-##    there have been changes to Git (added a tag, a commit, the project becomes dirty, etc.).
-##    We could create a custom command that depends on the .git directory, but I've found it
-##    to be unreliable. If you read this, feel free to improve of this aspect of this script
-##    and PR your suggestion :)
+##      - We want the script to run on every make because we have no simple way to check whether
+##        there have been changes to Git (added a tag, a commit, the project becomes dirty, etc.).
+##        We could create a custom command that depends on the .git directory, but I've found it
+##       to be unreliable. If you read this, feel free to improve of this aspect of this script
+##        and PR your suggestion :)
 ##
 ####################################################################################################
 

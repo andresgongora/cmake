@@ -2,11 +2,12 @@
 ##
 ##  Git
 ##
+##  To do:
+##      - Ejecutar comando para iniciar todos los submodulos: https://youtu.be/MRcztiUS7Uk?t=686
+##      - Fetch
+##      - Sanear
+##      - Etc.
 ##
 ####################################################################################################
 
-TODO:
-- Ejecutar comando para iniciar todos los submodulos: https://youtu.be/MRcztiUS7Uk?t=686
-- Fetch
-- Sanear
-- Etc.
+

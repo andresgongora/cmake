@@ -6,19 +6,24 @@
 ##  for unit testing.
 ##
 ##  Usage:
-##  Simply include this script from your project's test CMakeLists.txt.
-##  The default config values should work in most cases out of the box.
-##  Then add GTest as a dependency to your targets. See the following example:
+##      Simply include this script from your project's test CMakeLists.txt.
+##      The default config values should work in most cases out of the box.
+##      Then add GTest as a dependency to your targets. See the following example:
+##          ```
 ##          include(../tools/cmake/utils/GoogleTest.cmake)
 ##          add_executable(test_main test_main.cpp)
 ##          target_link_libraries(test_main PRIVATE GTest::GTest)
+##          ```
 ##
 ##  How it works:
-##  1. Create config to choose version we want to download, etc.
-##  2. Fetch GTest from github, it comes with its own CMake files.
-##  3. Create our GTest::GTest library (it's essentialy empty)
-##  4. Link our library with the actual GTest library (i.e., gtest_main)
-##  5. Gtest::Gtest is now available to be linked
+##      1. Create config to choose version we want to download, etc.
+##      2. Fetch GTest from github, it comes with its own CMake files.
+##      3. Create our GTest::GTest library (it's essentialy empty)
+##      4. Link our library with the actual GTest library (i.e., gtest_main)
+##      5. Gtest::Gtest is now available to be linked
+##
+##  To do:
+##      - Create a user-friendly function to add tests: https://hsf-training.github.io/hsf-training-cmake-webpage/11-functions/index.html
 ##
 ####################################################################################################
 
@@ -65,6 +70,6 @@ target_link_libraries(${GOOGLE_TEST_LIB_NAME} INTERFACE gtest_main)
 ##==================================================================================================
 ## Verbose
 ##==================================================================================================
-message("[GoogleTest.cmake] GTest added to your project. CMake targets may link to \"${GOOGLE_TEST_LIB_NAME}\".")
+message(STATUS "[GoogleTest.cmake] GTest added to your project. CMake targets may link to \"${GOOGLE_TEST_LIB_NAME}\".")
 
 #todo: EXCLUDE_FROM_ALL
