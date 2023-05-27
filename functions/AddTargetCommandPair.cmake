@@ -9,8 +9,9 @@
 ##  add_target_command_pair(
 ##      <TARGET_NAME>
 ##      (ALL)
-##      COMMAND <COMMAND_TO_RUN>
+##      COMMAND  <COMMAND_TO_RUN>
 ##      (DEPENDS <DEPENDENCY_FOR_COMMAND>)
+##      (COMMENT <COMMAND_COMMENT>)
 ##  )
 ##  ```
 ##
@@ -60,6 +61,7 @@
 ##      - ALL:                      Optionally, specify if the custom target should be added to ALL.
 ##      - COMMAND <COMMAND_TO_RUN>: Provide a command to run.
 ##      - DEPENDENTS <DEPENDENCY>:  Specify a single dependency
+##      - COMMENT <COMMAND_COMMENT>:Message to be displayed during command execution
 ##
 ##
 ##  TO DO:
@@ -82,11 +84,17 @@ function(add_target_command_pair TARGET_NAME)
     get_argument_from_list(ALL      ADD_TARGET_TO_ALL   CHECK_IF_PRESENT    ${ARGV})
     get_argument_from_list(COMMAND  ARG_COMMAND         REQUIRED            ${ARGV})
     get_argument_from_list(DEPENDS  ARG_DEPENDS         OPTIONAL            ${ARGV})
+    get_argument_from_list(COMMENT  ARG_CMD_COMMENT     OPTIONAL            ${ARGV})
 
     ## Aux variables
     set(WITNESS_FILE "${CMAKE_BINARY_DIR}/CMakeFiles/${TARGET_NAME}.done")
+
     if(NOT ARG_DEPENDS)
          set(ARG_DEPENDS ${WITNESS_FILE})
+    endif()
+
+    if(NOT ARG_CMD_COMMENT)
+        set(ARG_CMD_COMMENT "${TARGET_NAME}: running CMake command")
     endif()
 
     ## Prepare command argument
@@ -106,7 +114,7 @@ function(add_target_command_pair TARGET_NAME)
 
     add_custom_command(
         OUTPUT  ${WITNESS_FILE}                             ## By creating a witness file, the TARGET can DEPEND on the COMMAND
-        COMMENT "${TARGET_NAME}: running CMAKE command"
+        COMMENT ${ARG_CMD_COMMENT}
         COMMAND ${CMAKE_COMMAND} -E remove ${WITNESS_FILE}  ## Remove witness (it may not exist for the first run)
         COMMAND ${ARG_COMMAND}                              ## Run actual command
         COMMAND ${CMAKE_COMMAND} -E touch  ${WITNESS_FILE}  ## If command successful, restore witness
