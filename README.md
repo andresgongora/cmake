@@ -50,6 +50,11 @@ in your own scripts if you require the functionalities they provide.
   arguments and return their values. Among other options, arguments can be set to `REQUIRED` or
   `OPTIONAL`.
 
+- **AddTargetCommandPair**
+  Adds a chained custom target and custom command to run any command once during the compilation
+  phase, yet avoids running it unnecessarily during subsequent compilations. It uses a syntax that
+  is very similar to both `add_custom_target` and `add_custom_command`.
+
 
 
 <!------------------------------------------------+------------------------------------------------>
