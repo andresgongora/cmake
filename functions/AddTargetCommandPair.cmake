@@ -60,53 +60,51 @@
 ##      - TARGET_NAME:              Name for the custom target.
 ##      - ALL:                      Optionally, specify if the custom target should be added to ALL.
 ##      - COMMAND <COMMAND_TO_RUN>: Provide a command to run.
-##      - DEPENDENTS <DEPENDENCY>:  Specify a single dependency
+##      - DEPENDS <DEPENDENCY>:     Specify a single dependency
 ##      - COMMENT <COMMAND_COMMENT>:Message to be displayed during command execution
-##
-##
-##  TO DO:
-##      - Allow for more than once dependency
 ##
 ####################################################################################################
 
 cmake_minimum_required(VERSION 3.11)
 
-include("${CMAKE_CURRENT_LIST_DIR}/GetArgumentFromList.cmake")
-
 function(add_target_command_pair TARGET_NAME)
     message(STATUS "Adding ${TARGET_NAME} target-command pair")
 
     ##----------------------------------------------------------------------------------------------
-    ## Prepare
+    ## Function arguments
     ##
+    set(ARG_OPTIONS         ALL)
+    set(ARG_SINGLE_VALUE    COMMAND COMMENT)
+    set(ARG_MULTI_VALUE     DEPENDS)
 
-    ## Get arguments
-    get_argument_from_list(ALL      ADD_TARGET_TO_ALL   CHECK_IF_PRESENT    ${ARGV})
-    get_argument_from_list(COMMAND  ARG_COMMAND         REQUIRED            ${ARGV})
-    get_argument_from_list(DEPENDS  ARG_DEPENDS         OPTIONAL            ${ARGV})
-    get_argument_from_list(COMMENT  ARG_CMD_COMMENT     OPTIONAL            ${ARGV})
+    cmake_parse_arguments(
+        TARGET_COMMAND_PAIR "${ARG_OPTIONS}" "${ARG_SINGLE_VALUE}" "${ARG_MULTI_VALUE}" ${ARGN} )
 
-    ## Aux variables
-    set(WITNESS_FILE "${CMAKE_BINARY_DIR}/CMakeFiles/${TARGET_NAME}.done")
-
-    if(NOT ARG_DEPENDS)
-         set(ARG_DEPENDS ${WITNESS_FILE})
+    if(NOT TARGET_COMMAND_PAIR_COMMAND)
+        message(FATAL_ERROR "Must provide a command")
     endif()
 
-    if(NOT ARG_CMD_COMMENT)
-        set(ARG_CMD_COMMENT "${TARGET_NAME}: running CMake command")
+    ##----------------------------------------------------------------------------------------------
+    ## Aux variables
+    ##
+    set(WITNESS_FILE "${CMAKE_BINARY_DIR}/CMakeFiles/${TARGET_NAME}.done")
+
+    if(NOT TARGET_COMMAND_PAIR_DEPENDS)
+         set(TARGET_COMMAND_PAIR_DEPENDS ${WITNESS_FILE})
+    endif()
+
+    if(NOT TARGET_COMMAND_PAIR_COMMENT)
+        set(TARGET_COMMAND_PAIR_COMMENT "${TARGET_NAME}: running CMake command")
+    endif()
+
+    if(TARGET_COMMAND_PAIR_ALL)
+        set(TARGET_TO_ALL "ALL")
     endif()
 
     ## Prepare command argument
     ## The user has to provide a STRING to this function, example "echo hello world"
     ## However, COMMAND in add_custom_command expects a LIST instead of a single string
-    separate_arguments(ARG_COMMAND)
-
-    ## Trace
-    message(TRACE "ADD_TARGET_TO_ALL:\t${ADD_TARGET_TO_ALL}")
-    message(TRACE "COMMAND:\t\t${ARG_COMMAND}")
-    message(TRACE "WITNESS:\t\t${WITNESS_FILE}")
-    message(TRACE "DEPENDS:\t\t${ARG_DEPENDS}")
+    separate_arguments(TARGET_COMMAND_PAIR_COMMAND)
 
     ##----------------------------------------------------------------------------------------------
     ## Add command + target pair
@@ -114,16 +112,16 @@ function(add_target_command_pair TARGET_NAME)
 
     add_custom_command(
         OUTPUT  ${WITNESS_FILE}                             ## By creating a witness file, the TARGET can DEPEND on the COMMAND
-        COMMENT ${ARG_CMD_COMMENT}
         COMMAND ${CMAKE_COMMAND} -E remove ${WITNESS_FILE}  ## Remove witness (it may not exist for the first run)
-        COMMAND ${ARG_COMMAND}                              ## Run actual command
+        COMMAND ${TARGET_COMMAND_PAIR_COMMAND}              ## Run actual command
         COMMAND ${CMAKE_COMMAND} -E touch  ${WITNESS_FILE}  ## If command successful, restore witness
-        DEPENDS ${ARG_DEPENDS}
+        COMMENT ${TARGET_COMMAND_PAIR_COMMENT}
+        DEPENDS ${TARGET_COMMAND_PAIR_DEPENDS}
     )
 
     add_custom_target(
         "${TARGET_NAME}"
-        ${ADD_TARGET_TO_ALL}
+        ${TARGET_TO_ALL}
         DEPENDS ${WITNESS_FILE}
         COMMENT "${TARGET_NAME}"
     )

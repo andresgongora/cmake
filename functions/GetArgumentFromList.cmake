@@ -45,6 +45,15 @@ cmake_minimum_required(VERSION 3.12)
 
 function(get_argument_from_list KEYWORD OUTPUT_VARIABLE ARGUMENT_TYPE INPUT_LIST)
 
+    ##
+    ##  DEPRECATED NOTICE
+    ##
+    message(
+        DEPRECATION
+        "get_argument_from_list is deprecated, use the built-in feature instead: "
+        "https://cmake.org/cmake/help/latest/command/cmake_parse_arguments.html"
+    )
+
     ## Prepare list of possible arguments
     list(SUBLIST ARGV 3 -1 INPUT_LIST)
     if(NOT INPUT_LIST)
