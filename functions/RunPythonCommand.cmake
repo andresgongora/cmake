@@ -2,6 +2,11 @@
 # Use of this source code is governed by an MIT-style license that can be found
 # in the LICENSE file or at https://opensource.org/licenses/MIT.
 
+include_guard()
+cmake_minimum_required(VERSION 3.13)
+find_package(Python COMPONENTS Interpreter REQUIRED)
+include("${CMAKE_CURRENT_LIST_DIR}/AddTargetCommandPair.cmake")
+
 ####################################################################################################
 ##
 ##  RUN PYTHON COMMAND
@@ -13,20 +18,13 @@
 ##  run_python_command(
 ##      <TARGET_NAME>
 ##      PYTHON          <PYTHON_COMMAND>
-##      (COMMENT        <COMMENT_TO_PRINT_DURING_EXECUTION>)
-##      (REQUIREMENTS   <PATH_TO_REQUIREMENTS_FILE_FOR_PIP_TO_INSTALL>)
-##      (DEPENDS        <DEPENDENCY> <DEPENDENCY> <DEPENDENCY>...)
+##      [COMMENT        <COMMENT_TO_PRINT_DURING_EXECUTION>]
+##      [REQUIREMENTS   <PATH_TO_REQUIREMENTS_FILE_FOR_PIP_TO_INSTALL>]
+##      [DEPENDS        <DEPENDENCY> <DEPENDENCY> <DEPENDENCY>...]
 ##  )
 ##  ```
 ##
 ####################################################################################################
-
-cmake_minimum_required(VERSION 3.13)
-find_package(Python COMPONENTS Interpreter REQUIRED)
-
-#include("${CMAKE_CURRENT_LIST_DIR}/GetArgumentFromList.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/AddTargetCommandPair.cmake")
-
 function(run_python_command TARGET_NAME)
 
     ##----------------------------------------------------------------------------------------------

@@ -149,6 +149,15 @@ their choise will be saved for subsequent runs in a 'CMakeCache.txt' file.
             message(${OTHER_MSG})
         endif (${ENABLE_HELLO})
 
+### Option
+
+When it comes to `CACHE` variables, bool variables are the most common. So common in fact that
+there is a _shortcut_ to declare them using `option(<variable> "<help_text>" [value])`
+(defaults to `OFF`) like so:
+
+        option(MY_FLAG "This option can be set to ON or OFF" ON)
+        option(ENABLE_TURBO_MODE "This option defaults to OFF")
+
 ## Finding and adding files to your target
 
         file(GLOB_RECURSE SRCS  "*.cpp")            # Store *.cpp in ${SRCS}

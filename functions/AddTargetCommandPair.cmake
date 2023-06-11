@@ -2,6 +2,10 @@
 # Use of this source code is governed by an MIT-style license that can be found
 # in the LICENSE file or at https://opensource.org/licenses/MIT.
 
+include_guard()
+cmake_minimum_required(VERSION 3.11)
+include("${CMAKE_CURRENT_LIST_DIR}/../macros/Set.cmake")
+
 ####################################################################################################
 ##
 ##  AddTargetCommandPair
@@ -12,10 +16,10 @@
 ##  ```
 ##  add_target_command_pair(
 ##      <TARGET_NAME>
-##      (ALL)
+##      [ALL]
 ##      COMMAND  <COMMAND_TO_RUN>
-##      (DEPENDS <DEPENDENCY_FOR_COMMAND>)
-##      (COMMENT <COMMAND_COMMENT>)
+##      [DEPENDS <DEPENDENCY_FOR_COMMAND>]
+##      [COMMENT <COMMAND_COMMENT>]
 ##  )
 ##  ```
 ##
@@ -68,9 +72,6 @@
 ##      - COMMENT <COMMAND_COMMENT>:Message to be displayed during command execution
 ##
 ####################################################################################################
-
-cmake_minimum_required(VERSION 3.11)
-
 function(add_target_command_pair TARGET_NAME)
     message(STATUS "Adding ${TARGET_NAME} target-command pair")
 
@@ -92,18 +93,9 @@ function(add_target_command_pair TARGET_NAME)
     ## Aux variables
     ##
     set(WITNESS_FILE "${CMAKE_BINARY_DIR}/CMakeFiles/${TARGET_NAME}.done")
-
-    if(NOT TARGET_COMMAND_PAIR_DEPENDS)
-         set(TARGET_COMMAND_PAIR_DEPENDS ${WITNESS_FILE})
-    endif()
-
-    if(NOT TARGET_COMMAND_PAIR_COMMENT)
-        set(TARGET_COMMAND_PAIR_COMMENT "${TARGET_NAME}: running CMake command")
-    endif()
-
-    if(TARGET_COMMAND_PAIR_ALL)
-        set(TARGET_TO_ALL "ALL")
-    endif()
+    set_if_unset(TARGET_COMMAND_PAIR_DEPENDS ${WITNESS_FILE})
+    set_if_unset(TARGET_COMMAND_PAIR_COMMENT "${TARGET_NAME}: running CMake command")
+    set_if(ALL ${TARGET_COMMAND_PAIR_ALL})
 
     ## Prepare command argument
     ## The user has to provide a STRING to this function, example "echo hello world"
@@ -125,9 +117,9 @@ function(add_target_command_pair TARGET_NAME)
 
     add_custom_target(
         "${TARGET_NAME}"
-        ${TARGET_TO_ALL}
-        DEPENDS ${WITNESS_FILE}
+        ${ALL}
         COMMENT "${TARGET_NAME}"
+        DEPENDS ${WITNESS_FILE}
     )
 
 endfunction()
